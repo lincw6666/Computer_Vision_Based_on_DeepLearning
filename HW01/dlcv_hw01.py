@@ -36,24 +36,26 @@ data_loader_test = torch.utils.data.DataLoader(
     dataset_test, batch_size=1, shuffle=False, num_workers=4)
 
 """
-Show the picture. We can know that whether we have loaded the data correctly or not.
+Show the picture. We can know that whether we have loaded the data correctly or
+not.
 """
 
 for batched_data, label in data_loader_test:
     print(batched_data.size(), label.size())
-    
+
     # Show image.
     npimg = batched_data[0].numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
-    
+
     break
 
 """
 Build a CNN model.
 """
 
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+device = torch.device('cuda') if torch.cuda.is_available()\
+                              else torch.device('cpu')
 
 # Get the pretrained model.
 model = torchvision.models.resnet18(pretrained=True)
@@ -69,7 +71,6 @@ model.to(device)
 
 # Construct a criterion and an optimizer.
 criterion = torch.nn.CrossEntropyLoss()
-#criterion = torch.nn.MSELoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.005,
                             momentum=0.9, weight_decay=0.0005)
 
@@ -78,7 +79,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.005,
 lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer,
                                                step_size=3,
                                                gamma=0.1)
-    
+
 # let's train it for @num_epochs epochs
 num_epochs = 20
 for epoch in range(num_epochs):
@@ -89,13 +90,12 @@ for epoch in range(num_epochs):
         inputs, labels = data
         inputs = inputs.to(device)
         labels = labels.to(device)
-        
+
         # zero the parameter gradients
         optimizer.zero_grad()
 
         # forward + backward + optimize
         outputs = model(inputs)
-        #_, outputs = torch.max(outputs, 1)
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
@@ -108,7 +108,7 @@ for epoch in range(num_epochs):
             running_loss = 0.0
     # update the learning rate
     lr_scheduler.step()
-    
+
 print('Finished Training')
 
 """
@@ -153,8 +153,9 @@ print('Accuracy of the network on the %d test images: %d %%' % (
 Make prediction to non-labeld data.
 """
 
+
 def pil_loader(path):
-    # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
+    # open path as file to avoid ResourceWarning
     with open(path, 'rb') as f:
         img = Image.open(f)
         return img.convert('RGB')
@@ -175,7 +176,8 @@ def default_loader(path):
         return accimage_loader(path)
     else:
         return pil_loader(path)
-      
+
+
 def MyDataset(root_dir, transform):
     file_name = []
     images = []
@@ -200,5 +202,7 @@ with torch.no_grad():
 Export to a .csv file.
 """
 
-df = pd.DataFrame({'id':file_name, 'label':[data_classes[x] for x in prediction]})
+df = pd.DataFrame({
+    'id': file_name, 'label': [data_classes[x] for x in prediction]
+})
 df.to_csv('result.csv', index=False)
