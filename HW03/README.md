@@ -29,7 +29,7 @@ DLCV Homework 02
         - loading.py
 	- retinanet_train.py
     - evaluation.py
-    -dump_result_to_json.py
+    - dump_result_to_json.py
 - Unzip SVHN dataset under `data` directory.
 - Clone `mmdetection` from its github. Replace `mmdet/datasets/pipelines/loading.py` to the patch file in `mmdetection_patch`.
 - Install `mmdetection`. There's a tutorial for the installation.
