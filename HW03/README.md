@@ -3,7 +3,7 @@ DLCV Homework 03
 
 # Files description
 
-- **DLCV_HW03_RetinaNet.ipynb**: This jupyter notebook is what I'd done on the CoLab. So there're some blocks such as mounting google drive, which is useless when you run locally. This file is for development.
+- **DLCV_HW03_FCOS.ipynb**: This jupyter notebook is what I'd done on the CoLab. So there're some blocks such as mounting google drive, which is useless when you run locally. This file is for development.
 - **src**
     - **fcos_train.py**: It trains a FCOS on your dataset.
     - **evaluation.py**: It detects the number in the given single image.
