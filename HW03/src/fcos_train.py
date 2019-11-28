@@ -6,7 +6,7 @@ from mmdet.apis import (get_root_logger, init_dist, set_random_seed,
 from mmdet.models import build_detector
 import numpy as np
 
-cfg = Config.fromfile('./config/retinanet_r50_fpn_1x.py')
+cfg = Config.fromfile('./config/fcos_mstrain_640_288_resnet50_fpn_gn_2x.py')
 dataset = build_dataset(cfg.data.train, {'test_mode': True})
 dataset.CLASSES = ('1', '2', '3', '4', '5', '6', '7', '8', '9', '0')
 dataset.flag = np.ones(len(dataset), dtype=np.uint8)
