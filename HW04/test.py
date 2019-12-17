@@ -55,6 +55,7 @@ for imgid in coco_test.imgs:
             coco_dt.append(pred)
 
 # Save the prediction to a json file.
+os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
 out_pth = os.path.join(cfg.OUTPUT_DIR, "output.json")
 with open(out_pth, "w") as f:
     json.dump(coco_dt, f)
