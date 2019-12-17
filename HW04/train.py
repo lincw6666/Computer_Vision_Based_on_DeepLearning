@@ -30,7 +30,6 @@ cfg = get_cfg()
 cfg.merge_from_file(
     './detectron2/configs/COCO-InstanceSegmentation/' +
     'mask_rcnn_R_50_FPN_decay_0.01_momentum_0.9.yaml')
-cfg.SOLVER.MAX_ITER = 100
 cfg.OUTPUT_DIR = './train_logs/'
 
 # Start training.
