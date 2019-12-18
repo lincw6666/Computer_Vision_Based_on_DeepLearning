@@ -27,7 +27,7 @@ cfg.OUTPUT_DIR = './train_logs/'
 cfg.MODEL.WEIGHTS = args.model_pth
 cfg.DATASETS.TEST = ("test_dataset",)
 # Set the testing threshold for this model.
-cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.8
+cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.1
 predictor = DefaultPredictor(cfg)
 
 coco_test = COCO("data/test.json")
