@@ -74,7 +74,7 @@ def main():
     model.avgpool = AvgPool()
     model.last_linear = nn.Linear(feature_dim, N_CLASSES)
     use_cuda = cuda.is_available()
-    fresh_params = list(model.fresh_params())
+    fresh_params = list(model.last_linear.parameters())
     all_params = list(model.parameters())
     if use_cuda:
         model = model.cuda()
