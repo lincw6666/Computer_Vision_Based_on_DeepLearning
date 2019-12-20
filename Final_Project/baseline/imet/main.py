@@ -65,7 +65,7 @@ def main():
         )
     criterion = nn.BCEWithLogitsLoss(reduction='none')
     model = getattr(models, args.model)(
-        num_classes=N_CLASSES, pretrained=args.pretrained)
+        num_classes=N_CLASSES, pretrained='imagenet')
     use_cuda = cuda.is_available()
     fresh_params = list(model.fresh_params())
     all_params = list(model.parameters())
