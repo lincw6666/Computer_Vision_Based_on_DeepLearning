@@ -12,6 +12,7 @@ from sklearn.metrics import fbeta_score
 from sklearn.exceptions import UndefinedMetricWarning
 import torch
 from torch import nn, cuda
+from torch.nn import functional as F
 from torch.optim import Adam
 import tqdm
 
