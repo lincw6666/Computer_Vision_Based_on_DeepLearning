@@ -64,8 +64,15 @@ def main():
             num_workers=args.workers,
         )
     criterion = nn.BCEWithLogitsLoss(reduction='none')
-    model = getattr(models, args.model)(
-        num_classes=N_CLASSES, pretrained='imagenet')
+    model = getattr(models, args.model)()
+    feature_dim = model.last_linear.in_features
+    class AvgPool(nn.Module):
+        def forward(self, x):
+            # print (x.size())
+            return F.avg_pool2d(x, x.shape[2:])
+    model.avg_pool = AvgPool()
+    model.avgpool = AvgPool()
+    model.last_linear = nn.Linear(feature_dim, N_CLASSES)
     use_cuda = cuda.is_available()
     fresh_params = list(model.fresh_params())
     all_params = list(model.parameters())
