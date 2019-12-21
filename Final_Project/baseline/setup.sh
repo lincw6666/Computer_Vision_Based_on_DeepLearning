@@ -1,7 +1,3 @@
-pip install pretrainedmodels
-
-export PYTHONPATH=${PYTHONPATH}:/kaggle/working && python setup.py develop  --install-dir /kaggle/working
-
 download_from_gdrive() {
     file_id=$1
     file_name=$2
