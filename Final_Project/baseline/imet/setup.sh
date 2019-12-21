@@ -1,4 +1,3 @@
-git clone https://github.com/lincw6666/Computer_Vision_Based_on_DeepLearning.git --branch final_project --single-branch --depth 1
 mv Computer_Vision_Based_on_DeepLearning/Final_Project/baseline/* ./
 pip install pretrainedmodels
 
