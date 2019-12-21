@@ -1,4 +1,3 @@
-mv Computer_Vision_Based_on_DeepLearning/Final_Project/baseline/* ./
 pip install pretrainedmodels
 
 export PYTHONPATH=${PYTHONPATH}:/kaggle/working && python setup.py develop  --install-dir /kaggle/working
