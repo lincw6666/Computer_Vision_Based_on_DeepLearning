@@ -12,10 +12,11 @@ from sklearn.metrics import fbeta_score
 from sklearn.exceptions import UndefinedMetricWarning
 import torch
 from torch import nn, cuda
+from torch.nn import functional as F
 from torch.optim import Adam
 import tqdm
 
-from . import models
+import pretrainedmodels as models
 from .dataset import TrainDataset, TTADataset, get_ids, N_CLASSES, DATA_ROOT
 from .transforms import train_transform, test_transform
 from .utils import (
@@ -64,10 +65,17 @@ def main():
             num_workers=args.workers,
         )
     criterion = nn.BCEWithLogitsLoss(reduction='none')
-    model = getattr(models, args.model)(
-        num_classes=N_CLASSES, pretrained=args.pretrained)
+    model = getattr(models, args.model)()
+    feature_dim = model.last_linear.in_features
+    class AvgPool(nn.Module):
+        def forward(self, x):
+            # print (x.size())
+            return F.avg_pool2d(x, x.shape[2:])
+    model.avg_pool = AvgPool()
+    model.avgpool = AvgPool()
+    model.last_linear = nn.Linear(feature_dim, N_CLASSES)
     use_cuda = cuda.is_available()
-    fresh_params = list(model.fresh_params())
+    fresh_params = list(model.last_linear.parameters())
     all_params = list(model.parameters())
     if use_cuda:
         model = model.cuda()
