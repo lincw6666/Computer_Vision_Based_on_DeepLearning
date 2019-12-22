@@ -205,7 +205,7 @@ def train(args, model: nn.Module, criterion, *, params,
                 if use_cuda:
                     inputs, targets = inputs.cuda(), targets.cuda()
                 outputs = model(inputs)
-                loss = _reduce_loss(criterion(outputs, targets))
+                loss = criterion(outputs, targets)
                 batch_size = inputs.size(0)
                 (batch_size * loss).backward()
                 if (i + 1) % args.step == 0:
@@ -259,7 +259,7 @@ def validation(
                 inputs, targets = inputs.cuda(), targets.cuda()
             outputs = model(inputs)
             loss = criterion(outputs, targets)
-            all_losses.append(_reduce_loss(loss).item())
+            all_losses.append(loss.item())
             predictions = torch.sigmoid(outputs)
             all_predictions.append(predictions.cpu().numpy())
     all_predictions = np.concatenate(all_predictions)
