@@ -14,9 +14,10 @@ import torch
 from torch import nn, cuda
 from torch.nn import functional as F
 from torch.optim import Adam
+import torchvision.models as models
 import tqdm
 
-import pretrainedmodels as models
+# from . import models
 from .dataset import TrainDataset, TTADataset, get_ids, N_CLASSES, DATA_ROOT
 from .transforms import train_transform, test_transform
 from .utils import (
@@ -30,7 +31,7 @@ def main():
     arg('mode', choices=['train', 'validate', 'predict_valid', 'predict_test'])
     arg('run_root')
     arg('--model', default='resnet50')
-    arg('--pretrained', type=int, default=1)
+    arg('--pretrained', type=bool)
     arg('--batch-size', type=int, default=64)
     arg('--step', type=int, default=1)
     arg('--workers', type=int, default=2 if ON_KAGGLE else 4)
@@ -64,18 +65,11 @@ def main():
             batch_size=args.batch_size,
             num_workers=args.workers,
         )
-    criterion = nn.BCEWithLogitsLoss(reduction='none')
-    model = getattr(models, args.model)()
-    feature_dim = model.last_linear.in_features
-    class AvgPool(nn.Module):
-        def forward(self, x):
-            # print (x.size())
-            return F.avg_pool2d(x, x.shape[2:])
-    model.avg_pool = AvgPool()
-    model.avgpool = AvgPool()
-    model.last_linear = nn.Linear(feature_dim, N_CLASSES)
+    # criterion = nn.BCEWithLogitsLoss(reduction='none')
+    criterion = FocalLoss()
+    model = getattr(models, args.model)(pretrained=args.pretrained)
     use_cuda = cuda.is_available()
-    fresh_params = list(model.last_linear.parameters())
+    fresh_params = list(model.fresh_params())
     all_params = list(model.parameters())
     if use_cuda:
         model = model.cuda()
@@ -316,6 +310,22 @@ def _make_mask(argsorted, top_n: int):
 def _reduce_loss(loss):
     return loss.sum() / loss.shape[0]
 
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2):
+        super().__init__()
+        self.gamma = gamma
 
+    def forward(self, logit, target):
+        target = target.float()
+        max_val = (-logit).clamp(min=0)
+        loss = logit - logit * target + max_val + \
+               ((-max_val).exp() + (-logit - max_val).exp()).log()
+
+        invprobs = F.logsigmoid(-logit * (target * 2.0 - 1.0))
+        loss = (invprobs * self.gamma).exp() * loss
+        if len(loss.size())==2:
+            loss = loss.sum(dim=1)
+        return loss.mean()
+    
 if __name__ == '__main__':
     main()
