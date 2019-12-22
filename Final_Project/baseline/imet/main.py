@@ -71,7 +71,6 @@ def main():
     feature_dim = model.fc.in_features
     model.fc = nn.Linear(feature_dim, N_CLASSES)
     use_cuda = cuda.is_available()
-    fresh_params = list(model.fresh_params())
     all_params = list(model.parameters())
     if use_cuda:
         model = model.cuda()
@@ -99,11 +98,7 @@ def main():
             use_cuda=use_cuda,
         )
 
-        if args.pretrained:
-            if train(params=fresh_params, n_epochs=1, **train_kwargs):
-                train(params=all_params, **train_kwargs)
-        else:
-            train(params=all_params, **train_kwargs)
+        train(params=all_params, **train_kwargs)
 
     elif args.mode == 'validate':
         valid_loader = make_loader(valid_fold, test_transform)
