@@ -68,6 +68,8 @@ def main():
     # criterion = nn.BCEWithLogitsLoss(reduction='none')
     criterion = FocalLoss()
     model = getattr(models, args.model)(pretrained=args.pretrained)
+    feature_dim = model.fc.in_features
+    model.fc = nn.Linear(feature_dim, N_CLASSES)
     use_cuda = cuda.is_available()
     fresh_params = list(model.fresh_params())
     all_params = list(model.parameters())
