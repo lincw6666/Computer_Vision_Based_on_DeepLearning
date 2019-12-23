@@ -69,11 +69,11 @@ def main():
     criterion = nn.BCEWithLogitsLoss(reduction='none')
     model = getattr(models, args.model)(N_CLASSES, args.pretrained)
     feature_dim = model.last_linear.in_features
-    # class AvgPool(nn.Module):
-        # def forward(self, x):
-            # return F.avg_pool2d(x, x.shape[2:])
-    # model.avg_pool = AvgPool()
-    # model.avgpool = AvgPool()
+    class AvgPool(nn.Module):
+        def forward(self, x):
+            return F.avg_pool2d(x, x.shape[2:])
+    model.avg_pool = AvgPool()
+    model.avgpool = AvgPool()
     model.last_linear = nn.Linear(feature_dim, N_CLASSES)
     use_cuda = cuda.is_available()
     fresh_params = list(model.last_linear.parameters())
