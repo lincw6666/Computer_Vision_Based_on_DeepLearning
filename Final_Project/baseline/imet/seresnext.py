@@ -31,7 +31,7 @@ def main():
     arg('mode', choices=['train', 'validate', 'predict_valid', 'predict_test'])
     arg('run_root')
     arg('--model', default='resnet50')
-    arg('--pretrained', type=int)
+    arg('--pretrained', type=str)
     arg('--batch-size', type=int, default=64)
     arg('--step', type=int, default=1)
     arg('--workers', type=int, default=2 if ON_KAGGLE else 4)
