@@ -12,7 +12,7 @@ from .utils import ON_KAGGLE
 
 
 N_CLASSES = 1103
-DATA_ROOT = Path('../input/imet-2019-fgvc6' if ON_KAGGLE else './data')
+DATA_ROOT = Path('../input/imet-2019-fgvc6')# if ON_KAGGLE else './data')
 
 
 class TrainDataset(Dataset):
