@@ -100,7 +100,7 @@ def main():
             train_loader=train_loader,
             valid_loader=valid_loader,
             patience=args.patience,
-            init_optimizer=lambda params, lr, wd: AdamW(params, lr, wd),
+            init_optimizer=lambda params, lr, wd: AdamW(params, lr, weight_decay=wd),
             use_cuda=use_cuda,
         )
 
@@ -173,7 +173,7 @@ def train(args, model: nn.Module, criterion, *, params,
     lr = args.lr
     n_epochs = n_epochs or args.n_epochs
     params = list(params)
-    optimizer = init_optimizer(params, lr, [args.weight_decay])
+    optimizer = init_optimizer(params, lr, args.weight_decay)
     lr_schd = CosineAnnealingLR(optimizer, 15, 0.00001)
     lr_schd.step()
 
@@ -249,7 +249,7 @@ def train(args, model: nn.Module, criterion, *, params,
                 lr /= 5
                 print(f'lr updated to {lr}')
                 lr_reset_epoch = epoch
-                optimizer = init_optimizer(params, lr, [args.weight_decay])
+                optimizer = init_optimizer(params, lr, args.weight_decay)
             lr_schd.step()
         except KeyboardInterrupt:
             tq.close()
