@@ -175,7 +175,6 @@ def train(args, model: nn.Module, criterion, *, params,
     params = list(params)
     optimizer = init_optimizer(params, lr, args.weight_decay)
     lr_schd = CosineAnnealingLR(optimizer, 15, 0.00001)
-    lr_schd.step()
 
     run_root = Path(args.run_root)
     model_path = run_root / 'model.pt'
