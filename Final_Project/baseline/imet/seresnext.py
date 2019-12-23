@@ -14,7 +14,7 @@ import torch
 from torch import nn, cuda
 from torch.nn import functional as F
 from torch.optim import Adam
-import torchvision.models as models
+import pretrainedmodels as models
 import tqdm
 
 # from . import models
