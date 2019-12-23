@@ -67,7 +67,7 @@ def main():
             num_workers=args.workers,
         )
     criterion = FocalLoss()
-    model = getattr(models, args.model)(N_CLASSES, args.pretrained)
+    model = getattr(models, args.model)(1000, args.pretrained)
     feature_dim = model.last_linear.in_features
     class AvgPool(nn.Module):
         def forward(self, x):
