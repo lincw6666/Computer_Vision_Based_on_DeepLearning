@@ -13,11 +13,11 @@ from sklearn.exceptions import UndefinedMetricWarning
 import torch
 from torch import nn, cuda
 from torch.nn import functional as F
-from torch.optim import Adam
-import pretrainedmodels as models
+from torch.optim import AdamW
+from torch.optim.lr_scheduler import CosineAnnealingLR
 import tqdm
 
-# from . import models
+import pretrainedmodels as models
 from .dataset import TrainDataset, TTADataset, get_ids, N_CLASSES, DATA_ROOT
 from .transforms import train_transform, test_transform
 from .utils import (
@@ -35,7 +35,7 @@ def main():
     arg('--batch-size', type=int, default=64)
     arg('--step', type=int, default=1)
     arg('--workers', type=int, default=2 if ON_KAGGLE else 4)
-    arg('--lr', type=float, default=1e-4)
+    arg('--lr', type=float, default=0.00025)
     arg('--patience', type=int, default=4)
     arg('--clean', action='store_true')
     arg('--n-epochs', type=int, default=100)
@@ -45,6 +45,7 @@ def main():
     arg('--debug', action='store_true')
     arg('--limit', type=int)
     arg('--fold', type=int, default=0)
+    arg('--weight_decay', type=float, default=0.01)
     args = parser.parse_args()
 
     run_root = Path(args.run_root)
@@ -65,12 +66,17 @@ def main():
             batch_size=args.batch_size,
             num_workers=args.workers,
         )
-    # criterion = nn.BCEWithLogitsLoss(reduction='none')
-    criterion = FocalLoss()
-    model = getattr(models, args.model)(pretrained=args.pretrained)
-    feature_dim = model.fc.in_features
-    model.fc = nn.Linear(feature_dim, N_CLASSES)
+    criterion = nn.BCEWithLogitsLoss(reduction='none')
+    model = getattr(models, args.model)(N_CLASSES, args.pretrained)
+    feature_dim = model.last_linear.in_features
+    # class AvgPool(nn.Module):
+        # def forward(self, x):
+            # return F.avg_pool2d(x, x.shape[2:])
+    # model.avg_pool = AvgPool()
+    # model.avgpool = AvgPool()
+    model.last_linear = nn.Linear(feature_dim, N_CLASSES)
     use_cuda = cuda.is_available()
+    fresh_params = list(model.last_linear.parameters())
     all_params = list(model.parameters())
     if use_cuda:
         model = model.cuda()
@@ -94,11 +100,15 @@ def main():
             train_loader=train_loader,
             valid_loader=valid_loader,
             patience=args.patience,
-            init_optimizer=lambda params, lr: Adam(params, lr),
+            init_optimizer=lambda params, lr, wd: AdamW(params, lr, wd),
             use_cuda=use_cuda,
         )
 
-        train(params=all_params, **train_kwargs)
+        if args.pretrained:
+            if train(params=fresh_params, n_epochs=1, **train_kwargs):
+                train(params=all_params, **train_kwargs)
+        else:
+            train(params=all_params, **train_kwargs)
 
     elif args.mode == 'validate':
         valid_loader = make_loader(valid_fold, test_transform)
@@ -163,7 +173,9 @@ def train(args, model: nn.Module, criterion, *, params,
     lr = args.lr
     n_epochs = n_epochs or args.n_epochs
     params = list(params)
-    optimizer = init_optimizer(params, lr)
+    optimizer = init_optimizer(params, lr, args.weight_decay)
+    lr_schd = CosineAnnealingLR(optimizer, 15, 0.00001)
+    lr_schd.step()
 
     run_root = Path(args.run_root)
     model_path = run_root / 'model.pt'
@@ -237,7 +249,8 @@ def train(args, model: nn.Module, criterion, *, params,
                 lr /= 5
                 print(f'lr updated to {lr}')
                 lr_reset_epoch = epoch
-                optimizer = init_optimizer(params, lr)
+                optimizer = init_optimizer(params, lr, args.weight_decay)
+            lr_schd.step()
         except KeyboardInterrupt:
             tq.close()
             print('Ctrl+C, saving snapshot')
@@ -307,6 +320,7 @@ def _make_mask(argsorted, top_n: int):
 def _reduce_loss(loss):
     return loss.sum() / loss.shape[0]
 
+
 class FocalLoss(nn.Module):
     def __init__(self, gamma=2):
         super().__init__()
@@ -323,6 +337,7 @@ class FocalLoss(nn.Module):
         if len(loss.size())==2:
             loss = loss.sum(dim=1)
         return loss.mean()
-    
+
+        
 if __name__ == '__main__':
     main()
