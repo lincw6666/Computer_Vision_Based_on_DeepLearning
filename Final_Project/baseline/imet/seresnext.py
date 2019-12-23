@@ -66,7 +66,7 @@ def main():
             batch_size=args.batch_size,
             num_workers=args.workers,
         )
-    criterion = nn.BCEWithLogitsLoss(reduction='none')
+    criterion = FocalLoss()
     model = getattr(models, args.model)(N_CLASSES, args.pretrained)
     feature_dim = model.last_linear.in_features
     class AvgPool(nn.Module):
